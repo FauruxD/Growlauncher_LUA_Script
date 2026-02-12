@@ -4,6 +4,9 @@ plantId = 5640
 delayPlant = 25
 delayHarvest = 80
 count_ptht = 10
+magx = 30
+magy = 109
+
 local magplantEmpty = false
 mode = "ptht" -- "ptht" | "pt" | "ht"
 spray = "dgs" -- "uws" or "dgs"
@@ -15,8 +18,8 @@ function getMagplant()
     sendPacket(2,
         "action|dialog_return\n"..
         "dialog_name|itemsucker_block\n"..
-        "tilex|31|\n"..
-        "tiley|81|\n"..
+        "tilex|"..magx.."|\n"..
+        "tiley|"..magy.."|\n"..
         "buttonClicked|getplantationdevice\n"
     )
 end
