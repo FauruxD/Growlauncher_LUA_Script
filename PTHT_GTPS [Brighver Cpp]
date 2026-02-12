@@ -1,0 +1,217 @@
+-- ================= CONFIG =================
+seedId = 9929
+plantId = 5640
+delayPlant = 25
+delayHarvest = 80
+count_ptht = 10
+local magplantEmpty = false
+mode = "ptht" -- "ptht" | "pt" | "ht"
+spray = "dgs" -- "uws" or "dgs"
+-- =========================================
+
+
+-- ================= MAGPLANT =================
+function getMagplant()
+    sendPacket(2,
+        "action|dialog_return\n"..
+        "dialog_name|itemsucker_block\n"..
+        "tilex|31|\n"..
+        "tiley|81|\n"..
+        "buttonClicked|getplantationdevice\n"
+    )
+end
+
+-- ================= OVERLAY =================
+function Ovlay(text)
+    sendPacket(2,"action|input\n|text|"..text.."|\n")
+end
+
+-- ===============  VARIANT DETECT ===============
+
+AddHook(function(var)
+    if var.v1 == "OnDialogRequest" and var.v2:find("Ultra World Spray") then
+            return true
+    end
+	
+	if var.v1 == "OnTalkBubble" and var.v2:find("The `2Magplant (100K)") or var.v2:find("The `2MAGPLANT 5000") then
+		magplpantEmpty = true
+		return true
+	end
+	
+	if var.v1 == "OnTalkBubble" and var.v2:find("There is no active `2MAGPLANT 5000") then
+		magplantEmpty = true
+		return true
+	end
+end, "OnVariant")
+
+-- ================= PLACE / USE ITEM =================
+function pt(x, y, id)
+    local pkt = {}
+    pkt.type = 3
+    pkt.value = id
+    pkt.px = x
+    pkt.py = y
+    pkt.x = x * 32
+    pkt.y = y * 32
+    SendPacketRaw(false, pkt)
+end
+
+
+function bellow(x, y)
+    local below = GetTile(x, y +1)
+    return below and below.fg == 7520
+end
+-- ================= PLANT =================
+function plant()
+    for _, t in pairs(GetTiles()) do
+		if magplantEmpty then
+			Ovlay("`4Plant Stopped (Magplant is Empty)")
+			break
+		end
+		
+        if t.fg == 0 and bellow(t.x, t.y) then
+            pt(t.x, t.y, plantId)
+            Sleep(delayPlant)
+        end
+    end
+end
+
+-- ================= UWS =================
+function CountUnreadyTree()
+    local count = 0
+    for x = 0, 100 do
+        for y = 0, 113 do
+            local tile = GetTile(x,y)
+            if tile and tile.fg == seedId and not tile.readyharvest then
+                count = count + 1
+            end
+        end
+    end
+    return count
+end
+
+function Uws()
+    local unready = CountUnreadyTree()
+    Ovlay("Unready Tree: "..unready)
+
+    if unready >= 5000 then
+         Ovlay("`9Using Uws...")
+        sendPacket(2,"action|dialog_return\ndialog_name|world_spray\n")
+    else
+        Ovlay("`4Skip UWS")
+    end
+end
+
+function spray()
+	Ovlay("`9Using Spray")
+    for r, h in pairs(GetTiles()) do
+        if h.fg == seedId and not h.readyharvest then
+            Sleep(delayHarvest)
+            SendPacketRaw(false, {
+                type = 3,
+                value = 1778,
+                px = h.x,
+                py = h.y,
+                x = h.x * 32,
+                y = h.y * 32
+            })
+        end
+    end
+end
+
+
+-- ================= HARVEST =================
+function hitTile(x, y)
+    local pkt = {}
+    pkt.type = 3
+    pkt.value = 18
+    pkt.px = x
+    pkt.py = y
+    pkt.x = x * 32
+    pkt.y = y * 32
+    SendPacketRaw(false, pkt)
+end
+
+function harvest()
+    for x = 0, 100 do
+        local rowMiss
+        repeat
+            rowMiss = 0
+            for y = 0, 113 do
+                local tile = GetTile(x, y)
+                if tile and tile.fg == seedId and tile.readyharvest then
+                    local tries = 0
+                    repeat
+						SendPacketRaw(false, {
+                            state = 32,
+                            px = x, py = y,
+                            x = x * 32, y = y * 32
+                        })
+                        hitTile(x, y)
+                        Sleep(delayHarvest)
+                        tile = GetTile(x, y)
+                        tries = tries + 1
+                    until not (tile and tile.fg == seedId and tile.readyharvest)
+                          or tries >= 2
+
+                    if tile and tile.fg == seedId and tile.readyharvest then
+                        rowMiss = rowMiss + 1
+                    end
+                end
+            end
+        until rowMiss == 0
+        Sleep(25) -- rowDelay versi ringan (tidak ubah config lain)
+    end
+end
+
+-- ================= MAIN LOOP =================
+local done = 0
+
+Ovlay("`9Taking Magplant...")
+    Sleep(1000)
+    getMagplant()
+	pt(math.floor(GetLocal().posX/32), math.floor(GetLocal().posY/32), 5926)
+
+for i = 1, count_ptht do
+
+    -- ===== MODE PT / PTHT =====
+    if mode == "pt" or mode == "ptht" then
+        Ovlay("`9Starting Auto Plant...")
+        Sleep(1500)
+        plant()
+        Sleep(400)
+        Ovlay("`4DONE PLANT!")
+    end
+
+    -- ===== MODE PTHT USING UWS =====
+    if mode == "ptht" and spray == "uws" then
+        Sleep(4500)
+        Sleep(500)
+        Uws()
+    end
+	
+	-- ===== MODE PTHT USING DGS =====
+	if mode == "ptht" and spray == "dgs" then
+		Sleep(4500)
+		spray()
+	end
+	
+    -- ===== MODE HT / PTHT =====
+    if mode == "ht" or mode == "ptht" then
+        Sleep(5000)
+        Ovlay("`9Starting Auto Harvest")
+        Sleep(500)
+        harvest()
+        Sleep(400)
+        Ovlay("`4DONE HARVEST!")
+    end
+
+    done = done + 1
+    Ovlay("`cTotal Done : "..done.." / "..count_ptht)
+    LogToConsole("`cTotal Done : "..done.." / "..count_ptht)
+
+    Sleep(2000)
+    Ovlay("`9Loading Next Cycle")
+    Sleep(5000)
+end
+-- =========================================
