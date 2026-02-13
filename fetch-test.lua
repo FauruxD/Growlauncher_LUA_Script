@@ -6,7 +6,7 @@ function start()
         sendPacket(2,"action|input\n|text|Hai Nama Saya "..getLocal().name)
         sleep(2000)
     end
-  end
+  end)
 end
 
 AddHook(function(type, pkt)
