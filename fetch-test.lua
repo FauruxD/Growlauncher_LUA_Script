@@ -9,9 +9,9 @@ function startLoop()
     end)
 end
 
-AddHook(function(type, pkt)
+AddHook(function(type, packet)
 
-    if pkt:find("/start") then
+    if packet:find("/start") then
         if not run then
             run = true
             startLoop()
@@ -19,7 +19,7 @@ AddHook(function(type, pkt)
         return true
     end
 
-    if pkt:find("/stop") then
+    if packet:find("/stop") then
         run = false
         return true
     end
