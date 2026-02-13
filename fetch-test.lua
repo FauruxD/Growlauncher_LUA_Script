@@ -2,9 +2,9 @@ run = false
 
 function start()
   runThread(function()
-      while run do
-        sendPacket(2,"action|input\n|text|Hai Nama Saya "..getLocal().name)
-        sleep(2000)
+    while run do
+      sendPacket(2,"action|input\n|text|Hai Nama Saya "..getLocal().name)
+      sleep(2000)
     end
   end)
 end
