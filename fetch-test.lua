@@ -9,7 +9,7 @@ function startLoop()
     end)
 end
 
-AddHook("OnSendPacket", function(type, pkt)
+AddHook("onSendPacket", function(type, pkt)
 
     if pkt:find("/start") then
         if not run then
