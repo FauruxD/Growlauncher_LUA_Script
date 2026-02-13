@@ -1,4 +1,4 @@
-run = false
+local run = false
 
 function startLoop()
     runThread(function()
