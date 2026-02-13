@@ -9,7 +9,7 @@ function startLoop()
     end)
 end
 
-AddHook("onSendPacket", function(type, pkt)
+AddHook(function(type, pkt)
 
     if pkt:find("/start") then
         if not run then
@@ -24,7 +24,7 @@ AddHook("onSendPacket", function(type, pkt)
         return true
     end
 
-end)
+"onSendPacket", end)
 
 SendVariantList(
     {v1 = "OnTalkBubble", v2 = GetLocal().netID, v3 = "`9Script Fetched! Enjoy", v4 = 0, v5 = 0},
