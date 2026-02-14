@@ -24,7 +24,7 @@ function ontext(txt)
 end
 
 function talkBubble(text)
-    local msg = "`1[FARU]" `7 ..text
+    local msg = "`1[FARU] `7" ..text
     SendVariant({
         v1 = "OnTalkBubble",
         v2 = getLocal().netID,
