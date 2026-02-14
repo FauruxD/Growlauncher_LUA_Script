@@ -22,6 +22,15 @@ local localNetID = GetLocal().netID
 function ontext(txt)
     SendVariant({v1 = "OnTextOverlay", v2 = txt})
 end
+
+function talkBubble(text)
+    local msg = `1[FARU] `7..text
+    SendVariant({
+        v1 = "OnTalkBubble",
+        v2 = getLocal().netID,
+        v3 = msg
+    })
+end
 -- ===========================================
 
 -- ================== INIT PNB ==================
@@ -751,154 +760,181 @@ function hook(type, str)
     -- ================= DROP COMMANDS =================
     if str:find("/w (%d+)") then
         local a = tonumber(str:match("/w (%d+)"))
-        clock(242,1796,a); drops(242,a); return true
+        clock(242,1796,a); drops(242,a); talkBubble("`9Dropped `2"..a.." `9World Lock!"); return true
     end
     if str:find("/wx2 (%d+)") then
         local a = tonumber(str:match("/wx2 (%d+)"))*2
-        clock(242,1796,a); drops(242,a); return true
+        clock(242,1796,a); drops(242,a); talkBubble("`9Dropped `2"..a.." `9World Locks!"); return true
     end
     if str:find("/wx3 (%d+)") then
         local a = tonumber(str:match("/wx3 (%d+)"))*3
-        clock(242,1796,a); drops(242,a); return true
+        clock(242,1796,a); drops(242,a); talkBubble("`9Dropped `2"..a.." `9World Locks!"); return true
     end
     if str:find("/wall") then
-        for _,i in pairs(GetInventory()) do if i.id==242 then drops(242,i.amount) end end
+        for _,i in pairs(GetInventory()) do if i.id==242 then drops(242,i.amount) talkBubble("`9Dropped `2"..i.amount.." `9World Locks!") end end
         return true
     end
 
     if str:find("/d (%d+)") then
         local a = tonumber(str:match("/d (%d+)"))
-        clock(1796,242,a); clock(1796,7188,a); drops(1796,a); return true
+        clock(1796,242,a); clock(1796,7188,a); drops(1796,a)
+        talkBubble("`9Dropped `2"..a.." `9Diamond Lock!"); return true
     end
     if str:find("/dx2 (%d+)") then
         local a = tonumber(str:match("/dx2 (%d+)"))*2
-        clock(1796,242,a); clock(1796,7188,a); drops(1796,a); return true
+        clock(1796,242,a); clock(1796,7188,a); drops(1796,a)
+        talkBubble("`9Dropped `2"..a.." `9Diamond Lock!"); return true
     end
     if str:find("/dx3 (%d+)") then
         local a = tonumber(str:match("/dx3 (%d+)"))*3
-        clock(1796,242,a); clock(1796,7188,a); drops(1796,a); return true
+        clock(1796,242,a); clock(1796,7188,a); drops(1796,a)
+        talkBubble("`9Dropped `2"..a.." `9Diamond Lock!"); return true
     end
     if str:find("/dall") then
-        for _,i in pairs(GetInventory()) do if i.id==1796 then drops(1796,i.amount) end end
+        for _,i in pairs(GetInventory()) do if i.id==1796 then drops(1796,i.amount) talkBubble("`9Dropped `2"..i.amount.." `9Diamond Locks!") end end
         return true
     end
 
     if str:find("/b (%d+)") then
         local a = tonumber(str:match("/b (%d+)"))
-        drops(7188,a); return true
+        drops(7188,a)
+        talkBubble("`9Dropped `2"..a.." `9Blue Gem Lock!"); return true
     end
     if str:find("/bx2 (%d+)") then
         local a = tonumber(str:match("/bx2 (%d+)"))*2
-        drops(7188,a); return true
+        drops(7188,a)
+        talkBubble("`9Dropped `2"..a.." `9Blue Gem Lock!"); return true
     end
     if str:find("/bx3 (%d+)") then
         local a = tonumber(str:match("/bx3 (%d+)"))*3
-        drops(7188,a); return true
+        drops(7188,a)
+        talkBubble("`9Dropped `2"..a.." `9Blue Gem Lock!"); return true
     end
     if str:find("/ball") then
-        for _,i in pairs(GetInventory()) do if i.id==7188 then drops(7188,i.amount) end end
+        for _,i in pairs(GetInventory()) do if i.id==7188 then drops(7188,i.amount) talkBubble("`9Dropped `2"..i.amount.." `9Blue Gem Locks!") end end
         return true
     end
 
     if str:find("/g (%d+)") then
         local a = tonumber(str:match("/g (%d+)"))
-        drops(8470,a); return true
+        drops(8470,a)
+        talkBubble("`9Dropped `2"..a.." `9Golden Gem Lock!"); return true
     end
     if str:find("/gx2 (%d+)") then
         local a = tonumber(str:match("/gx2 (%d+)"))*2
-        drops(8470,a); return true
+        drops(8470,a)
+        talkBubble("`9Dropped `2"..a.." `9Golden Gem Lock!"); return true
     end
     if str:find("/gx3 (%d+)") then
         local a = tonumber(str:match("/gx3 (%d+)"))*3
-        drops(8470,a); return true
+        drops(8470,a)
+        talkBubble("`9Dropped `2"..a.." `9Golden Gem Lock!"); return true
     end
     if str:find("/gall") then
-        for _,i in pairs(GetInventory()) do if i.id==8470 then drops(8470,i.amount) end end
+        for _,i in pairs(GetInventory()) do if i.id==8470 then drops(8470,i.amount) talkBubble("`9Dropped `2"..i.amount.." `9Golden Gem Lock!") end end
         return true
     end
 
     if str:find("/t (%d+)") then
         local a = tonumber(str:match("/t (%d+)"))
-        drops(13200,a); return true
+        drops(13200,a)
+        talkBubble("`9Dropped `2"..a.." `9The Glorious Skull!"); return true
     end
     if str:find("/tx2 (%d+)") then
         local a = tonumber(str:match("/tx2 (%d+)"))*2
-        drops(13200,a); return true
+        drops(13200,a)
+        talkBubble("`9Dropped `2"..a.." `9The Glorious Skull!"); return true
     end
     if str:find("/tx3 (%d+)") then
         local a = tonumber(str:match("/tx3 (%d+)"))*3
-        drops(13200,a); return true
+        drops(13200,a)
+        talkBubble("`9Dropped `2"..a.." `9The Glorious Skull!"); return true
     end
     if str:find("/tall") then
-        for _,i in pairs(GetInventory()) do if i.id==13200 then drops(13200,i.amount) end end
+        for _,i in pairs(GetInventory()) do if i.id==13200 then drops(13200,i.amount) talkBubble("`9Dropped `2"..i.amount.." `9The Glorious Skull!") end end
         return true
     end
 
     if str:find("/m (%d+)") then
         local a = tonumber(str:match("/m (%d+)"))
-        drops(4428,a); return true
+        drops(4428,a)
+        talkBubble("`9Dropped `2"..a.." `9The Majestic Dragon!"); return true
     end
     if str:find("/mx2 (%d+)") then
         local a = tonumber(str:match("/mx2 (%d+)"))*2
-        drops(4428,a); return true
+        drops(4428,a)
+        talkBubble("`9Dropped `2"..a.." `9The Majestic Dragon!"); return true
     end
     if str:find("/mx3 (%d+)") then
         local a = tonumber(str:match("/mx3 (%d+)"))*3
-        drops(4428,a); return true
+        drops(4428,a)
+        talkBubble("`9Dropped `2"..a.." `9The Majestic Dragon!"); return true
     end
     if str:find("/mall") then
-        for _,i in pairs(GetInventory()) do if i.id==4428 then drops(4428,i.amount) end end
+        for _,i in pairs(GetInventory()) do if i.id==4428 then drops(4428,i.amount) talkBubble("`9Dropped `2"..i.amount.." `9The Majestic Dragon!") end end
         return true
     end
 
     if str:find("/y (%d+)") then
         local a = tonumber(str:match("/y (%d+)"))
-        drops(2950,a); return true
+        drops(2950,a)
+        talkBubble("`9Dropped `2"..a.." `9YinYang Universe Artifacts!"); return true
     end
     if str:find("/yx2 (%d+)") then
         local a = tonumber(str:match("/yx2 (%d+)"))*2
-        drops(2950,a); return true
+        drops(2950,a)
+        talkBubble("`9Dropped `2"..a.." `9YinYang Universe Artifacts!"); return true
     end
     if str:find("/yx3 (%d+)") then
         local a = tonumber(str:match("/yx3 (%d+)"))*3
-        drops(2950,a); return true
+        drops(2950,a)
+        talkBubble("`9Dropped `2"..a.." `9YinYang Universe Artifacts!"); return true
     end
     if str:find("/yall") then
-        for _,i in pairs(GetInventory()) do if i.id==2950 then drops(2950,i.amount) end end
+        for _,i in pairs(GetInventory()) do if i.id==2950 then drops(2950,i.amount) talkBubble("`9Dropped `2"..i.amount.." `9YinYang Universe Artifacts!") end end
         return true
     end
 
     if str:find("/bv (%d+)") then
         local a = tonumber(str:match("/bv (%d+)"))
-        drops(5260,a); return true
+        drops(5260,a)
+        talkBubble("`9Dropped `2"..a.." `9Bunny Valentine Artifact!"); return true
     end
     if str:find("/bv2 (%d+)") then
         local a = tonumber(str:match("/bv2 (%d+)"))*2
-        drops(5260,a); return true
+        drops(5260,a)
+        talkBubble("`9Dropped `2"..a.." `9Bunny Valentine Artifact!"); return true
     end
     if str:find("/bv3 (%d+)") then
         local a = tonumber(str:match("/bv3 (%d+)"))*3
-        drops(5260,a); return true
+        drops(5260,a)
+        talkBubble("`9Dropped `2"..a.." `9Bunny Valentine Artifact!"); return true
     end
     if str:find("/bval") then
-        for _,i in pairs(GetInventory()) do if i.id==5260 then drops(5260,i.amount) end end
+        for _,i in pairs(GetInventory()) do if i.id==5260 then 
+            drops(5260,i.amount)
+            talkBubble("`9Dropped `2"..i.amount.." `9Bunny Valentine Artifact!")
+        end end
         return true
     end
 
     if str:find("/c (%d+)") then
-        local a = tonumber(str:match("/l (%d+)"))
-        drops(10410,a); return true
+        local a = tonumber(str:match("/c (%d+)"))
+        drops(10410,a)
+        talkBubble("`9Dropped `2"..a.." `9Chongqing Lion Artifact!"); return true
     end
     if str:find("/cx2 (%d+)") then
-        local a = tonumber(str:match("/lx2 (%d+)"))*2
-        drops(10410,a); return true
+        local a = tonumber(str:match("/cx2 (%d+)"))*2
+        drops(10410,a)
+        talkBubble("`9Dropped `2"..a.." `9Chongqing Lion Artifact!"); return true
     end
     if str:find("/cx3 (%d+)") then
-        local a = tonumber(str:match("/lx3 (%d+)"))*3
-        drops(10410,a); return true
+        local a = tonumber(str:match("/cx3 (%d+)"))*3
+        drops(10410,a)
+        talkBubble("`9Dropped `2"..a.." `9Chongqing Lion Artifact!"); return true
     end
     if str:find("/call") then
-        for _,i in pairs(GetInventory()) do if i.id==10410 then drops(10410,i.amount) end end
+        for _,i in pairs(GetInventory()) do if i.id==10410 then drops(10410,i.amount) talkBubble("`9Dropped `2"..i.amount.." `9Chongqing Lion Artifact!") end end
         return true
     end
     -- =================================================
@@ -909,6 +945,7 @@ function hook(type, str)
             for _,i in pairs(GetInventory()) do
                 if i.id==id then
                     drops(id,i.amount)
+                    talkBubble("`9Dropped all Locks!")
                 end
             end
         end
@@ -928,9 +965,11 @@ function hook(type, str)
 
         if exchangeToggle[ex_id] then
             log("Exchange ON: " .. ex_id)
+            talkBubble("`2Started exchange: " .. ex_id)
             StartExchangeLoop(ex_id)
         else
             log("Exchange OFF: " .. ex_id)
+            talkBubble("`2Stopped exchange: " .. ex_id)
         end
         return true
     end
@@ -940,6 +979,7 @@ function hook(type, str)
             exchangeToggle[k] = false
         end
         log("All exchange loops stopped.")
+        talkBubble("`2All exchange loops stopped.")
         return true
     end
 
@@ -949,6 +989,6 @@ end
 
 AddHook(hook,"OnSendPacket")
 -- =========================================================
-SendVariant({v1="OnTalkBubble", v2=netID, v3="Helper Script Loaded!", v4=0})
-LogToConsole("`3[FaRu#1204] `2Loaded Successfully! Type `9/helper `2to open the menu.")
+talkBubble("`9Script Loaded! `9Type `2/helper `9to open the menu.")
+LogToConsole("`3[Helper Script] `2Loaded Successfully! Type `9/helper `2to open the menu.")
 -- =========================================================
