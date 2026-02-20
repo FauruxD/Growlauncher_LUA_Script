@@ -210,66 +210,107 @@ end_dialog|pthtconfig|Cancel||
 end
 
 -- ================= MAIN LOOP =================
-local done = 0
+isRunning = false
+done = 0
 
 Ovlay("`9Taking Magplant...")
     Sleep(1000)
     getMagplant()
 	pt(math.floor(GetLocal().posX/32), math.floor(GetLocal().posY/32), 5926)
 
-addHook(function(type, str)
-	if str:find("/start") then
-		for i = 1, count_ptht do
+AddHook(function(type, str)
 
-			-- ===== MODE PT / PTHT =====
-			if mode == "pt" or mode == "ptht" then
-				Ovlay("`9Starting Auto Plant...")
-				Sleep(1500)
-				plant()
-				Sleep(1500)
-				Ovlay("`4DONE PLANT!")
-			end
+    -- ================= START =================
+    if str:find("/start") then
+        if isRunning then
+            Ovlay("`4Script already running!")
+            return true
+        end
 
-			-- ===== MODE PTHT USING UWS =====
-			if mode == "ptht" and sprayMode == "uws" then
-				Sleep(4500)
-				Sleep(500)
-				Uws()
-			end
-			
-			-- ===== MODE PTHT USING DGS =====
-			if mode == "ptht" and sprayMode == "dgs" then
-				Sleep(4500)
-				spray()
-			end
-			
-			-- ===== MODE HT / PTHT =====
-			if mode == "ht" or mode == "ptht" then
-				Sleep(5000)
-				Ovlay("`9Starting Auto Harvest")
-				Sleep(500)
-				harvest()
-				Sleep(400)
-				Ovlay("`4DONE HARVEST!")
-			end
+        isRunning = true
+        done = 0
 
-			done = done + 1
-			Ovlay("`cTotal Done : "..done.." / "..count_ptht)
-			LogToConsole("`cTotal Done : "..done.." / "..count_ptht)
+        Ovlay("`2PTHT Script Started!")
 
-			Sleep(2000)
-			Ovlay("`9Loading Next Cycle")
-			Sleep(3000)
-		end
-		return true
-	elseif str:find("/stop") then
-		break()
-		return true 
-	end
-	
-	if str:find("/config") then
-		configMenu()
-	end
+        for i = 1, count_ptht do
+
+            if not isRunning then break end
+
+            -- ===== MODE PT / PTHT =====
+            if mode == "pt" or mode == "ptht" then
+                Ovlay("`9Starting Auto Plant...")
+                Sleep(1500)
+                plant()
+                Sleep(1000)
+                Ovlay("`2DONE PLANT!")
+            end
+
+            if not isRunning then break end
+
+            -- ===== MODE PTHT USING UWS =====
+            if mode == "ptht" and sprayMode == "uws" then
+                Sleep(4500)
+                if not isRunning then break end
+                Uws()
+            end
+
+            if not isRunning then break end
+
+            -- ===== MODE PTHT USING DGS =====
+            if mode == "ptht" and sprayMode == "dgs" then
+                Sleep(4500)
+                if not isRunning then break end
+                spray()
+            end
+
+            if not isRunning then break end
+
+            -- ===== MODE HT / PTHT =====
+            if mode == "ht" or mode == "ptht" then
+                Sleep(5000)
+                if not isRunning then break end
+
+                Ovlay("`9Starting Auto Harvest")
+                Sleep(500)
+                harvest()
+                Sleep(400)
+                Ovlay("`2DONE HARVEST!")
+            end
+
+            done = done + 1
+            Ovlay("`cTotal Done : "..done.." / "..count_ptht)
+            LogToConsole("`cTotal Done : "..done.." / "..count_ptht)
+
+            Sleep(2000)
+            Ovlay("`9Loading Next Cycle")
+            Sleep(3000)
+        end
+
+        isRunning = false
+        Ovlay("`4PTHT Script Finished!")
+
+        return true
+    end
+
+
+    -- ================= STOP =================
+    if str:find("/stop") then
+        if not isRunning then
+            Ovlay("`4Script not running!")
+            return true
+        end
+
+        isRunning = false
+        Ovlay("`4Stopping Script...")
+        return true
+    end
+
+
+    -- ================= CONFIG =================
+    if str:find("/config") then
+        configMenu()
+        return true
+    end
 	
 	if str:find("buttonClicked|saveconfig") then
 		mode = str:match("typeMode|([%w_]+)") or mode
@@ -288,4 +329,4 @@ addHook(function(type, str)
 
 		return true
 	end
-end
+end, "onSendPacket")
