@@ -565,6 +565,7 @@ add_text_input|typeMode|`9Mode [pt/ht/ptht]||5|
 add_text_input|sprayMode|`9Spray Mode [uws/dgs]||5|
 add_text_input|plantId|`9ID Plant||5|
 add_text_input|seedId|`9ID Harvest||5|
+add_text_input|platformId|`9ID Platform||5|
 add_text_input|delayPlant|`9Delay Plant||5|
 add_text_input|delayHarvest|`9Delay Harvest||5|
 add_text_input|xmag|`9Pos Mag X||5|
@@ -741,6 +742,7 @@ function hook(type, str)
 		sprayMode = str:match("sprayMode|([%w_]+)") or sprayMode
 		plantId = tonumber(str:match("plantId|(%d+)")) or plantId
 		seedId = tonumber(str:match("seedId|(%d+)")) or seedId
+		platformId = tonumber(str:match("platformId|(%d+)")) or platformId
 		delayPlant = tonumber(str:match("delayPlant|(%d+)")) or delayPlant
 		delayHarvest = tonumber(str:match("delayHarvest|(%d+)")) or delayHarvest
 		magx = tonumber(str:match("xmag|(%d+)")) or magx
@@ -979,6 +981,7 @@ talkBubble("`9Script Loaded! `9Type `2/helper `9to open the menu.")
 LogToConsole("`3[FaRu] `2Loaded Successfully! Type `9/helper `2to open the menu.")
 
 -- =========================================================
+
 
 
 
