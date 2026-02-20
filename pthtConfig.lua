@@ -258,16 +258,16 @@ add_label_with_icon|small|`7Loop : ]]..countPtht..[[|left|15110|
 
 
 add_spacer|small|
-add_text_input|typeMode|`9Mode [pt/ht/ptht]|]]..mode..[[|5|
-add_text_input|sprayMode|`9Spray Mode [uws/dgs]|]]..sprayMode..[[|5|
-add_text_input|plantId|`9ID Plant|]]..plantId..[[|5|
-add_text_input|seedId|`9ID Harvest|]]..seedId..[[|5|
-add_text_input|delayPlant|`9Delay Plant|]]..delayPlant..[[|5|
-add_text_input|delayHarvest|`9Delay Harvest|]]..delayHarvest..[[|5|
-add_text_input|xmag|`9Pos Mag X|]]..magx..[[|5|
-add_text_input|ymag|`9Pos Mag Y|]]..magy..[[|5|
-add_text_input|countTree|`9Minimal Tree for UWS|]]..countTree..[[|5|
-add_text_input|countPtht|`9Count Repeat|]]..countPtht..[[|5|
+add_text_input|typeMode|`9Mode [pt/ht/ptht]||5|
+add_text_input|sprayMode|`9Spray Mode [uws/dgs]||5|
+add_text_input|plantId|`9ID Plant||5|
+add_text_input|seedId|`9ID Harvest||5|
+add_text_input|delayPlant|`9Delay Plant||5|
+add_text_input|delayHarvest|`9Delay Harvest||5|
+add_text_input|xmag|`9Pos Mag X||5|
+add_text_input|ymag|`9Pos Mag Y||5|
+add_text_input|countTree|`9Minimal Tree for UWS||5|
+add_text_input|countPtht|`9Count Repeat||5|
 
 add_spacer|small|
 add_button|saveconfig|Save Config|
