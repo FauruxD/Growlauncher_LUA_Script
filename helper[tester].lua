@@ -552,7 +552,7 @@ add_label_with_icon|small|`7Mode : ptht|left|14922|
 add_label_with_icon|small|`7Spray Mode : uws|left|5926|
 add_label_with_icon|small|`7ID Plant : 5640 - `9]]..growtopia.getItemName(5640)..[[|left|5640|
 add_label_with_icon|small|`7ID Harvest : 333 - `9]]..growtopia.getItemName(333)..[[|left|333|
-add_label_with_icon|small|`7ID Harvest : 7520 - `9]]..growtopia.getItemName(7520)..[[|left|7520|
+add_label_with_icon|small|`7ID Platform : 7520 - `9]]..growtopia.getItemName(7520)..[[|left|7520|
 add_label_with_icon|small|`7Delay Plant : 25|left|3804|
 add_label_with_icon|small|`7Delay Harvest : 80|left|3804|
 add_label_with_icon|small|`7Pos Mag : X: 27 Y: 109|left|5638|
@@ -595,7 +595,7 @@ add_label_with_icon|small|`7Mode : ]]..mode..[[|left|14922|
 add_label_with_icon|small|`7Spray Mode : ]]..sprayMode..[[|left|5926|
 add_label_with_icon|small|`7ID Plant : ]]..plantId..[[ - `9]]..growtopia.getItemName(plantId)..[[|left|]]..plantId..[[|
 add_label_with_icon|small|`7ID Harvest : ]]..seedId..[[ - `9]]..growtopia.getItemName(seedId)..[[|left|]]..seedId..[[|
-add_label_with_icon|small|`7ID Harvest : ]]..platformId..[[ - `9]]..growtopia.getItemName(platformId)..[[|left|]]..platformId..[[|
+add_label_with_icon|small|`7ID Platform : ]]..platformId..[[ - `9]]..growtopia.getItemName(platformId)..[[|left|]]..platformId..[[|
 add_label_with_icon|small|`7Delay Plant : ]]..delayPlant..[[|left|3804|
 add_label_with_icon|small|`7Delay Harvest : ]]..delayHarvest..[[|left|3804|
 add_label_with_icon|small|`7Pos Mag : X: ]]..magx..[[ Y: ]]..magy..[[|left|5638|
@@ -979,5 +979,6 @@ talkBubble("`9Script Loaded! `9Type `2/helper `9to open the menu.")
 LogToConsole("`3[FaRu] `2Loaded Successfully! Type `9/helper `2to open the menu.")
 
 -- =========================================================
+
 
 
