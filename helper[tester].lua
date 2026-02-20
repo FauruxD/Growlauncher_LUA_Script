@@ -608,7 +608,7 @@ end
 -- ============ VARIANT HOOK =============
 AddHook(function(var)
     if var.v1 == "OnDialogRequest" and var.v2:find("end_dialog|exchange") then
-        SendVariantList({
+        SendVariant({
             v1 = "OnDialogRequest",
             v2 = "add_label_with_icon|big|`wSC BY FaRu``|left|5956|\nadd_spacer|small|\nadd_textbox|Just Press Button GET, and it Will Looping Exchange.|\nadd_textbox||\nadd_textbox||\nadd_spacer|small|\n" .. var.v2
         })
@@ -966,3 +966,4 @@ talkBubble("`9Script Loaded! `9Type `2/helper `9to open the menu.")
 LogToConsole("`3[FaRu] `2Loaded Successfully! Type `9/helper `2to open the menu.")
 
 -- =========================================================
+
