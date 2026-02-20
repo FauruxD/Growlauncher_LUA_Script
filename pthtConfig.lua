@@ -245,7 +245,7 @@ add_smalltext|`7Hi ]]..getLocal().name..[[|
 add_smalltext|`7Type /infoo to see your latest config|
 add_smalltext|`7This Script is Made by `c@FaRu|
 add_spacer|small|
-add_label_with_icon|small|`7Default Config : |left||
+add_label_with_icon|small|`7Default Config : |||
 add_label_with_icon|small|`7Mode : ]]..mode..[[|left|14922|
 add_label_with_icon|small|`7Spray Mode : ]]..sprayMode..[[|left|5926|
 add_label_with_icon|small|`7ID Plant : ]]..plantId..[[ - `9]]..growtopia.getItemName(plantId)..[[|left|]]..plantId..[[|
