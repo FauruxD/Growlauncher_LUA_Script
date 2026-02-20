@@ -11,6 +11,8 @@ countTree = 3300
 magplantEmpty = false
 mode = "ptht" -- "ptht" | "pt" | "ht"
 sprayMode = "uws" -- "uws" or "dgs"
+isRunning = false
+done = 0
 -- =========================================
 
 
@@ -163,6 +165,76 @@ function harvest()
         Sleep(25) -- rowDelay versi ringan (tidak ubah config lain)
     end
 end
+
+-- ================ START PTHT =================
+function startPtht()
+	if isRunning then
+        Ovlay("`4Script already running!")
+        return true
+    end
+
+    isRunning = true
+    done = 0
+
+    Ovlay("`2PTHT Script Started!")
+
+    for i = 1, count_ptht do
+        if not isRunning then break end
+
+        -- ===== MODE PT / PTHT =====
+        if mode == "pt" or mode == "ptht" then
+            Ovlay("`9Starting Auto Plant...")
+            Sleep(1500)
+            plant()
+            Sleep(1000)
+            Ovlay("`2DONE PLANT!")
+        end
+
+        if not isRunning then break end
+
+        -- ===== MODE PTHT USING UWS =====
+        if mode == "ptht" and sprayMode == "uws" then
+            Sleep(4500)
+            if not isRunning then break end
+            Uws()
+        end
+
+        if not isRunning then break end
+
+        -- ===== MODE PTHT USING DGS =====
+        if mode == "ptht" and sprayMode == "dgs" then
+            Sleep(4500)
+            if not isRunning then break end
+            spray()
+        end
+
+        if not isRunning then break end
+
+        -- ===== MODE HT / PTHT =====
+        if mode == "ht" or mode == "ptht" then
+            Sleep(5000)
+            if not isRunning then break end
+
+            Ovlay("`9Starting Auto Harvest")
+            Sleep(500)
+            harvest()
+            Sleep(400)
+            Ovlay("`2DONE HARVEST!")
+        end
+
+        done = done + 1
+        Ovlay("`cTotal Done : "..done.." / "..count_ptht)
+        LogToConsole("`cTotal Done : "..done.." / "..count_ptht)
+
+        Sleep(2000)
+        Ovlay("`9Loading Next Cycle")
+        Sleep(3000)
+    end
+
+    isRunning = false
+    Ovlay("`4PTHT Script Finished!")
+end
+
 -- ================= INFO MENU =================
 function configMenu()
 	local dialog = [[
@@ -206,9 +278,6 @@ end_dialog|pthtconfig|Cancel||
 end
 
 -- ================= MAIN LOOP =================
-isRunning = false
-done = 0
-
 Ovlay("`9Taking Magplant...")
     Sleep(1000)
     getMagplant()
@@ -218,73 +287,7 @@ AddHook(function(type, str)
 
     -- ================= START =================
     if str:find("/start") then
-        if isRunning then
-            Ovlay("`4Script already running!")
-            return true
-        end
-
-        isRunning = true
-        done = 0
-
-        Ovlay("`2PTHT Script Started!")
-
-        for i = 1, count_ptht do
-
-            if not isRunning then break end
-
-            -- ===== MODE PT / PTHT =====
-            if mode == "pt" or mode == "ptht" then
-                Ovlay("`9Starting Auto Plant...")
-                Sleep(1500)
-                plant()
-                Sleep(1000)
-                Ovlay("`2DONE PLANT!")
-            end
-
-            if not isRunning then break end
-
-            -- ===== MODE PTHT USING UWS =====
-            if mode == "ptht" and sprayMode == "uws" then
-                Sleep(4500)
-                if not isRunning then break end
-                Uws()
-            end
-
-            if not isRunning then break end
-
-            -- ===== MODE PTHT USING DGS =====
-            if mode == "ptht" and sprayMode == "dgs" then
-                Sleep(4500)
-                if not isRunning then break end
-                spray()
-            end
-
-            if not isRunning then break end
-
-            -- ===== MODE HT / PTHT =====
-            if mode == "ht" or mode == "ptht" then
-                Sleep(5000)
-                if not isRunning then break end
-
-                Ovlay("`9Starting Auto Harvest")
-                Sleep(500)
-                harvest()
-                Sleep(400)
-                Ovlay("`2DONE HARVEST!")
-            end
-
-            done = done + 1
-            Ovlay("`cTotal Done : "..done.." / "..count_ptht)
-            LogToConsole("`cTotal Done : "..done.." / "..count_ptht)
-
-            Sleep(2000)
-            Ovlay("`9Loading Next Cycle")
-            Sleep(3000)
-        end
-
-        isRunning = false
-        Ovlay("`4PTHT Script Finished!")
-
+		startPtht()
         return true
     end
 
