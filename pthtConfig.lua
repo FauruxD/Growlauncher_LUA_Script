@@ -287,7 +287,7 @@ AddHook(function(type, str)
 
     -- ================= START =================
     if str:find("/start") then
-		startPtht()
+		runThread(startPtht)
         return true
     end
 
