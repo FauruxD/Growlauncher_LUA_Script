@@ -187,7 +187,7 @@ function startPtht()
             Sleep(1500)
             plant()
             Sleep(1000)
-            Ovlay("`2DONE PLANT!")
+            Ovlay("`4DONE PLANT!")
         end
 
         if not isRunning then break end
@@ -219,12 +219,11 @@ function startPtht()
             Sleep(500)
             harvest()
             Sleep(400)
-            Ovlay("`2DONE HARVEST!")
+            Ovlay("`4DONE HARVEST!")
         end
 
         done = done + 1
         Ovlay("`cTotal Done : "..done.." / "..count_ptht)
-        LogToConsole("`cTotal Done : "..done.." / "..count_ptht)
 
         Sleep(2000)
         Ovlay("`9Loading Next Cycle")
@@ -245,7 +244,8 @@ add_spacer|small|
 add_smalltext|`7Hi ]]..getLocal().name..[[|
 add_smalltext|`7Type /infoo to see your latest config|
 add_smalltext|`7This Script is Made by `c@FaRu|
-add_label_with_icon|small|`7Default Config : |left|15110|
+add_spacer|small|
+add_label_with_icon|small|`7Default Config : |left||
 add_label_with_icon|small|`7Mode : ]]..mode..[[|left|14922|
 add_label_with_icon|small|`7Spray Mode : ]]..sprayMode..[[|left|5926|
 add_label_with_icon|small|`7ID Plant : ]]..plantId..[[ - `9]]..growtopia.getItemName(plantId)..[[|left|]]..plantId..[[|
@@ -254,7 +254,7 @@ add_label_with_icon|small|`7Delay Plant : ]]..delayPlant..[[|left|3804|
 add_label_with_icon|small|`7Delay Harvest : ]]..delayHarvest..[[|left|3804|
 add_label_with_icon|small|`7Pos Mag : X: ]]..magx..[[ Y: ]]..magy..[[|left|5638|
 add_label_with_icon|small|`7Minimal Tree : ]]..countTree..[[|left|854|
-add_label_with_icon|small|`7Loop : ]]..countPtht..[[|left||
+add_label_with_icon|small|`7Loop : ]]..countPtht..[[|left|15110|
 
 
 add_spacer|small|
