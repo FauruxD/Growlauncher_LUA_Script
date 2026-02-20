@@ -518,6 +518,8 @@ end
 -- ================== UI : CONFIG PNB ==================
 function openPNBConfig()
     local dialog = [[
+set_border_color|0,215,230,255
+set_bg_color|0,20,180,200
 add_label_with_icon|big|`7PNB Configuration|left|9472|
 add_spacer|small|
 add_text_input|itemid|Item ID|]]..itemid..[[|5|
@@ -962,4 +964,5 @@ AddHook(hook,"OnSendPacket")
 -- =========================================================
 talkBubble("`9Script Loaded! `9Type `2/helper `9to open the menu.")
 LogToConsole("`3[FaRu] `2Loaded Successfully! Type `9/helper `2to open the menu.")
+
 -- =========================================================
