@@ -336,7 +336,7 @@ AddHook(function(type, str)
 		magx = tonumber(str:match("xmag|(%d+)")) or magx
 		magy = tonumber(str:match("ymag|(%d+)")) or magy
 		countTree = tonumber(str:match("countTree|(%d+)")) or countTree
-		count_ptht = tonumber(str:match("countPtht|(%d+)")) or count_ptht
+		countPtht = tonumber(str:match("countPtht|(%d+)")) or countPtht
 
 		Ovlay("`2Config Saved Successfully!")
 		LogToConsole("`2PTHT Config Updated!")
