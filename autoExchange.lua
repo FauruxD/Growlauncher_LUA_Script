@@ -2,7 +2,7 @@ local isExchangeRunning = false
 
 AddHook(function(var)
     if var.v1 == "OnDialogRequest" and var.v2:find("end_dialog|exchange") then
-        SendVariantList({
+        SendVariant({
             v1 = "OnDialogRequest",
             v2 =
             "add_label_with_icon|big|`wSC BY FaRu``|left|5956|\n" ..
@@ -17,7 +17,6 @@ AddHook(function(var)
 end, "OnVariant")
 
 function exchange(text)
-    local msg = "`o[FaRu] `w" .. text
     SendPacket(2, "action|input\n|text|" .. msg)
 end
 
