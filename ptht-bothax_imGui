@@ -1,239 +1,374 @@
--- ===============================
--- PTHT IMGUI FULL VERSION
--- ===============================
+-- ================= IMGUI CHECK =================
+if not ImGui then
+    SendVariantList({[0]="OnTextOverlay",[1]="`4ImGui not available! Enable all APIs first!"})
+    Sleep(3000)
+    SendVariantList({[0]="OnTextOverlay",[1]="`2If still error, try Reset State!"})
+    return
+end
 
--- ===== DEFAULT CONFIG =====
-seedId = 333
-plantId = 5640
-platformId = 7520
-
+-- ================= CONFIG =================
+seedId     = 3044
+plantId    = 5640
 delayPlant = 25
 delayHarvest = 80
+count_ptht = 20
+magx       = 27
+magy       = 109
+count_tree = 4000
+platformId = 0
 
-magx = 27
-magy = 109
-
-countTree = 3300
-countPtht = 1
-
-mode = "ptht"
-sprayMode = "uws"
-
-isRunning = false
-done = 0
 magplantEmpty = false
+mode      = "ht"    -- "ptht" | "pt" | "ht"
+sprayMode = "uws"   -- "uws" | "dgs"
+autoSpray = false
+isRunning = false
+done      = 0
 
--- ===============================
--- SAVE / LOAD CONFIG
--- ===============================
+-- GUI State
+local panel_visible = true
+local modeOptions   = { "pt", "ht", "ptht" }
+local sprayOptions  = { "uws", "dgs" }
+local selectedMode  = 2   -- default "ht"
+local selectedSpray = 1   -- default "uws"
 
-local CONFIG_FILE = "ptht_config.txt"
-
-function saveToFile()
-    local file = io.open(CONFIG_FILE, "w")
-    if not file then return end
-
-    file:write("mode="..mode.."\n")
-    file:write("sprayMode="..sprayMode.."\n")
-    file:write("plantId="..plantId.."\n")
-    file:write("seedId="..seedId.."\n")
-    file:write("platformId="..platformId.."\n")
-    file:write("delayPlant="..delayPlant.."\n")
-    file:write("delayHarvest="..delayHarvest.."\n")
-    file:write("magx="..magx.."\n")
-    file:write("magy="..magy.."\n")
-    file:write("countTree="..countTree.."\n")
-    file:write("countPtht="..countPtht.."\n")
-
-    file:close()
+-- ================= MAGPLANT =================
+function getMagplant()
+    SendPacket(2,
+        "action|dialog_return\n" ..
+        "dialog_name|itemsucker_block\n" ..
+        "tilex|" .. magx .. "|\n" ..
+        "tiley|" .. magy .. "|\n" ..
+        "buttonClicked|getplantationdevice\n"
+    )
 end
 
-function loadFromFile()
-    local file = io.open(CONFIG_FILE, "r")
-    if not file then return end
+-- ================= OVERLAY =================
+function Ovlay(text)
+    SendPacket(2, "action|input\n|text|" .. text .. "|\n")
+end
 
-    for line in file:lines() do
-        local key, value = line:match("(.+)=(.+)")
-        if key == "mode" then mode = value end
-        if key == "sprayMode" then sprayMode = value end
-        if key == "plantId" then plantId = tonumber(value) end
-        if key == "seedId" then seedId = tonumber(value) end
-        if key == "platformId" then platformId = tonumber(value) end
-        if key == "delayPlant" then delayPlant = tonumber(value) end
-        if key == "delayHarvest" then delayHarvest = tonumber(value) end
-        if key == "magx" then magx = tonumber(value) end
-        if key == "magy" then magy = tonumber(value) end
-        if key == "countTree" then countTree = tonumber(value) end
-        if key == "countPtht" then countPtht = tonumber(value) end
+-- ================= VARIANT DETECT =================
+AddHook("OnVariant", "MagplantDetect", function(var)
+    if var[0] == "OnTalkBubble" then
+        local text = var[2] or ""
+        if text:find("The `2Magplant") or text:find("There is no active") or text:find("The `2MAGPLANT") then
+            magplantEmpty = true
+            return true
+        end
     end
+    if var[0] == "OnDialogRequest" then
+        if (var[1] or ""):find("Ultra World Spray") then
+            return true
+        end
+    end
+end)
 
-    file:close()
-end
-
-loadFromFile()
-
--- ===============================
--- CORE FUNCTIONS
--- ===============================
-
-function Ov(text)
-    SendVariantList({[0]="OnTextOverlay",[1]=text})
-end
-
+-- ================= PLACE / USE ITEM =================
 function pt(x, y, id)
-    SendPacketRaw(false,{
-        type = 3,
-        int_data = id,
-        int_x = x,
-        int_y = y,
-        pos_x = x*32,
-        pos_y = y*32
+    SendPacketRaw(false, {
+        type  = 3,
+        value = id,
+        px    = x,
+        py    = y,
+        x     = x * 32,
+        y     = y * 32
     })
 end
 
-function hitTile(x,y)
-    pt(x,y,18)
+function bellow(x, y)
+    local below = GetTile(x, y + 1)
+    return below and below.fg == platformId
 end
 
-function below(x,y)
-    local b = GetTile(x,y+1)
-    return b and b.fg == platformId
-end
-
+-- ================= PLANT =================
 function plant()
-    for _,t in pairs(GetTiles()) do
-        if not isRunning then return end
-        if t.fg == 0 and below(t.x,t.y) then
-            pt(t.x,t.y,plantId)
+    for _, t in pairs(GetTiles()) do
+        if magplantEmpty then
+            Ovlay("`4Plant Stopped (Magplant is Empty)")
+            break
+        end
+        if t.fg == 0 and bellow(t.x, t.y) then
+            pt(t.x, t.y, plantId)
             Sleep(delayPlant)
         end
     end
 end
 
+-- ================= UWS =================
 function CountUnreadyTree()
-    local c=0
-    for _,t in pairs(GetTiles()) do
-        if t.fg==seedId and not t.readyharvest then
-            c=c+1
+    local count = 0
+    for _, tile in pairs(GetTiles()) do
+        if tile.fg == seedId and tile.extra then
+            if tile.extra.progress < 1 then
+                count = count + 1
+            end
         end
     end
-    return c
+    return count
 end
 
 function Uws()
-    if CountUnreadyTree() >= countTree then
-        SendPacket(2,"action|dialog_return\ndialog_name|world_spray\n")
+    local unready = CountUnreadyTree()
+    Ovlay("Unready Tree: " .. unready)
+    if unready >= count_tree then
+        Ovlay("`9Using UWS...")
+        SendPacket(2, "action|dialog_return\ndialog_name|world_spray\n")
+    else
+        Ovlay("`4Skip UWS")
     end
 end
 
 function spray()
-    for _,t in pairs(GetTiles()) do
-        if not isRunning then return end
-        if t.fg==seedId and not t.readyharvest then
-            pt(t.x,t.y,1778)
+    Ovlay("`9Using Spray")
+    for _, h in pairs(GetTiles()) do
+        if h.fg == seedId and not h.readyharvest then
             Sleep(delayHarvest)
+            SendPacketRaw(false, {
+                type  = 3,
+                value = 1778,
+                px    = h.x,
+                py    = h.y,
+                x     = h.x * 32,
+                y     = h.y * 32
+            })
         end
     end
+    Ovlay("`4Done Spray")
+end
+
+-- ================= HARVEST =================
+function hitTile(x, y)
+    SendPacketRaw(false, {
+        type  = 3,
+        value = 18,
+        px    = x,
+        py    = y,
+        x     = x * 32,
+        y     = y * 32
+    })
+end
+
+function isReady(tile)
+    return tile
+        and tile.fg == seedId
+        and tile.extra
+        and tile.extra.progress
+        and tile.extra.progress >= 1
 end
 
 function harvest()
-    for _,t in pairs(GetTiles()) do
-        if not isRunning then return end
-        if t.fg==seedId and t.readyharvest then
-            hitTile(t.x,t.y)
-            Sleep(delayHarvest)
-        end
+    for x = 0, 100 do
+        local rowMiss
+        repeat
+            rowMiss = 0
+            for y = 0, 113 do
+                local tile = GetTile(x, y)
+                if isReady(tile) then
+                    local tries = 0
+                    repeat
+                        SendPacketRaw(false, {
+                            state = 32,
+                            px    = x,
+                            py    = y,
+                            x     = x * 32,
+                            y     = y * 32
+                        })
+                        hitTile(x, y)
+                        Sleep(delayHarvest)
+                        tile  = GetTile(x, y)
+                        tries = tries + 1
+                    until not isReady(tile) or tries >= 3
+                    if isReady(tile) then
+                        rowMiss = rowMiss + 1
+                    end
+                end
+            end
+        until rowMiss == 0
+        Sleep(25)
     end
 end
 
-function startPtht()
-    if isRunning then return end
-    isRunning = true
-    done = 0
+-- ================= MAIN LOOP =================
+function startFarm()
+    isRunning     = true
+    done          = 0
+    magplantEmpty = false
 
-    for i=1,countPtht do
+    Ovlay("`9Taking Magplant...")
+    Sleep(1000)
+    getMagplant()
+
+    local localPlayer = GetLocal()
+    if localPlayer then
+        pt(math.floor(localPlayer.pos.x / 32),
+           math.floor(localPlayer.pos.y / 32),
+           5926)
+    end
+
+    for i = 1, count_ptht do
         if not isRunning then break end
 
-        if mode=="pt" or mode=="ptht" then plant() end
-        if not isRunning then break end
+        if mode == "pt" or mode == "ptht" then
+            Ovlay("`9Starting Auto Plant...")
+            Sleep(1500)
+            plant()
+            Sleep(1500)
+            Ovlay("`4DONE PLANT!")
+        end
 
-        if mode=="ptht" and sprayMode=="uws" then Uws() end
-        if mode=="ptht" and sprayMode=="dgs" then spray() end
-        if not isRunning then break end
+        if mode == "ptht" and autoSpray then
+            Sleep(5000)
+            if sprayMode == "uws" then
+                Uws()
+            elseif sprayMode == "dgs" then
+                spray()
+            end
+        end
 
-        if mode=="ht" or mode=="ptht" then harvest() end
+        if mode == "ht" or mode == "ptht" then
+            Sleep(5000)
+            Ovlay("`9Starting Auto Harvest")
+            Sleep(500)
+            harvest()
+            Sleep(400)
+            Ovlay("`4DONE HARVEST!")
+        end
 
         done = done + 1
+        Ovlay("`cTotal Done : " .. done .. " / " .. count_ptht)
+
         Sleep(2000)
+        Ovlay("`9Loading Next Cycle")
+        Sleep(3000)
     end
 
-    isRunning=false
+    isRunning = false
+    Ovlay("`2Farm Finished!")
 end
 
--- ===============================
--- IMGUI MENU
--- ===============================
+-- ================= TOGGLE PANEL =================
+AddHook("input", "FarmPanelToggle", function(key)
+    if key == 112 then -- F1 key
+        panel_visible = not panel_visible
+    end
+end)
 
-AddHook("OnDraw","PTHT_MENU",function()
+-- ================= GUI RENDER =================
+AddHook("draw", "FarmPanel", function(delta)
+    if not panel_visible then return end
 
-    if ImGui.Begin("PTHT Automation") then
+    if ImGui.Begin("SatanFarm - Bothax") then
 
-        ImGui.Text("=== CONFIG ===")
-
-        local c1,v1 = ImGui.InputText("Mode", mode, 10)
-        if c1 then mode=v1 end
-
-        local c2,v2 = ImGui.InputText("Spray Mode", sprayMode, 10)
-        if c2 then sprayMode=v2 end
-
-        local c3,v3 = ImGui.InputInt("Plant ID", plantId)
-        if c3 then plantId=v3 end
-
-        local c4,v4 = ImGui.InputInt("Seed ID", seedId)
-        if c4 then seedId=v4 end
-
-        local c5,v5 = ImGui.InputInt("Platform ID", platformId)
-        if c5 then platformId=v5 end
-
-        local c6,v6 = ImGui.SliderInt("Delay Plant", delayPlant,10,500)
-        if c6 then delayPlant=v6 end
-
-        local c7,v7 = ImGui.SliderInt("Delay Harvest", delayHarvest,10,500)
-        if c7 then delayHarvest=v7 end
-
-        local c8,v8 = ImGui.InputInt("Mag X", magx)
-        if c8 then magx=v8 end
-
-        local c9,v9 = ImGui.InputInt("Mag Y", magy)
-        if c9 then magy=v9 end
-
-        local c10,v10 = ImGui.InputInt("Min Tree UWS", countTree)
-        if c10 then countTree=v10 end
-
-        local c11,v11 = ImGui.InputInt("Loop Count", countPtht)
-        if c11 then countPtht=v11 end
-
+        -- Status & Control
+        ImGui.Text("Status   : " .. (isRunning and "RUNNING" or "STOPPED"))
+        ImGui.Text("Progress : " .. done .. " / " .. count_ptht)
         ImGui.Separator()
 
         if not isRunning then
-            if ImGui.Button("START") then
-                runThread(startPtht)
+            if ImGui.Button("START FARM") then
+                RunThread(startFarm)
             end
         else
-            if ImGui.Button("STOP") then
-                isRunning=false
+            if ImGui.Button("STOP FARM") then
+                isRunning = false
             end
+            ImGui.SameLine()
+            ImGui.Text("Running...")
         end
 
-        ImGui.SameLine()
-        if ImGui.Button("Save") then saveToFile() end
+        ImGui.Separator()
 
-        ImGui.SameLine()
-        if ImGui.Button("Load") then loadFromFile() end
+        -- Farm Mode
+        ImGui.Text("Farm Mode :")
+        if ImGui.BeginCombo("##mode", modeOptions[selectedMode]) then
+            for i, v in ipairs(modeOptions) do
+                local isSel = (i == selectedMode)
+                if ImGui.Selectable(v, isSel) then
+                    selectedMode = i
+                    mode = v
+                end
+                if isSel then ImGui.SetItemDefaultFocus() end
+            end
+            ImGui.EndCombo()
+        end
+        ImGui.Text("pt=Plant Only | ht=Harvest Only | ptht=Both")
 
         ImGui.Separator()
-        ImGui.Text("Progress: "..done.." / "..countPtht)
 
-        ImGui.End()
+        -- Loop Count
+        local lcC, lcV = ImGui.InputInt("Loop Count", count_ptht)
+        if lcC and lcV > 0 then count_ptht = lcV end
+
+        ImGui.Separator()
+
+        -- Item IDs
+        ImGui.Text("[ Item Config ]")
+        local siC, siV = ImGui.InputInt("Seed ID", seedId)
+        if siC and siV >= 0 then seedId = siV end
+
+        local piC, piV = ImGui.InputInt("Plant ID", plantId)
+        if piC and piV >= 0 then plantId = piV end
+
+        local pfC, pfV = ImGui.InputInt("Platform ID", platformId)
+        if pfC and pfV >= 0 then platformId = pfV end
+
+        ImGui.Separator()
+
+        -- Delays
+        ImGui.Text("[ Delay Settings ]")
+        local pdC, pdV = ImGui.InputInt("Plant Delay (ms)", delayPlant)
+        if pdC and pdV > 0 then delayPlant = pdV end
+
+        local hdC, hdV = ImGui.InputInt("Harvest Delay (ms)", delayHarvest)
+        if hdC and hdV > 0 then delayHarvest = hdV end
+
+        ImGui.Separator()
+
+        -- Spray
+        ImGui.Text("[ Spray ] (ptht mode only)")
+        local spC, spV = ImGui.Checkbox("Enable Auto Spray", autoSpray)
+        if spC then autoSpray = spV end
+
+        ImGui.Text("Spray Mode :")
+        if ImGui.BeginCombo("##spray", sprayOptions[selectedSpray]) then
+            for i, v in ipairs(sprayOptions) do
+                local isSel = (i == selectedSpray)
+                if ImGui.Selectable(v, isSel) then
+                    selectedSpray = i
+                    sprayMode = v
+                end
+                if isSel then ImGui.SetItemDefaultFocus() end
+            end
+            ImGui.EndCombo()
+        end
+        ImGui.Text("uws=Ultra World Spray | dgs=DGS Spray")
+
+        local ctC, ctV = ImGui.InputInt("Min Unready Trees (UWS)", count_tree)
+        if ctC and ctV > 0 then count_tree = ctV end
+
+        ImGui.Separator()
+
+        -- Magplant
+        ImGui.Text("[ Magplant Position ]")
+        local mxC, mxV = ImGui.InputInt("Magplant X", magx)
+        if mxC then magx = mxV end
+
+        local myC, myV = ImGui.InputInt("Magplant Y", magy)
+        if myC then magy = myV end
+
+        if ImGui.Button("GET CURRENT POSITION") then
+            local p = GetLocal()
+            if p then
+                magx = math.floor(p.pos.x / 32)
+                magy = math.floor(p.pos.y / 32)
+            end
+        end
+        ImGui.SameLine()
+        if ImGui.Button("TRIGGER MAGPLANT") then
+            getMagplant()
+        end
+        ImGui.Text("Current: (" .. magx .. ", " .. magy .. ")")
+
     end
+    ImGui.End()
 end)
