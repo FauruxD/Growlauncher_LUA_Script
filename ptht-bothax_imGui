@@ -1,0 +1,239 @@
+-- ===============================
+-- PTHT IMGUI FULL VERSION
+-- ===============================
+
+-- ===== DEFAULT CONFIG =====
+seedId = 333
+plantId = 5640
+platformId = 7520
+
+delayPlant = 25
+delayHarvest = 80
+
+magx = 27
+magy = 109
+
+countTree = 3300
+countPtht = 1
+
+mode = "ptht"
+sprayMode = "uws"
+
+isRunning = false
+done = 0
+magplantEmpty = false
+
+-- ===============================
+-- SAVE / LOAD CONFIG
+-- ===============================
+
+local CONFIG_FILE = "ptht_config.txt"
+
+function saveToFile()
+    local file = io.open(CONFIG_FILE, "w")
+    if not file then return end
+
+    file:write("mode="..mode.."\n")
+    file:write("sprayMode="..sprayMode.."\n")
+    file:write("plantId="..plantId.."\n")
+    file:write("seedId="..seedId.."\n")
+    file:write("platformId="..platformId.."\n")
+    file:write("delayPlant="..delayPlant.."\n")
+    file:write("delayHarvest="..delayHarvest.."\n")
+    file:write("magx="..magx.."\n")
+    file:write("magy="..magy.."\n")
+    file:write("countTree="..countTree.."\n")
+    file:write("countPtht="..countPtht.."\n")
+
+    file:close()
+end
+
+function loadFromFile()
+    local file = io.open(CONFIG_FILE, "r")
+    if not file then return end
+
+    for line in file:lines() do
+        local key, value = line:match("(.+)=(.+)")
+        if key == "mode" then mode = value end
+        if key == "sprayMode" then sprayMode = value end
+        if key == "plantId" then plantId = tonumber(value) end
+        if key == "seedId" then seedId = tonumber(value) end
+        if key == "platformId" then platformId = tonumber(value) end
+        if key == "delayPlant" then delayPlant = tonumber(value) end
+        if key == "delayHarvest" then delayHarvest = tonumber(value) end
+        if key == "magx" then magx = tonumber(value) end
+        if key == "magy" then magy = tonumber(value) end
+        if key == "countTree" then countTree = tonumber(value) end
+        if key == "countPtht" then countPtht = tonumber(value) end
+    end
+
+    file:close()
+end
+
+loadFromFile()
+
+-- ===============================
+-- CORE FUNCTIONS
+-- ===============================
+
+function Ov(text)
+    SendVariantList({[0]="OnTextOverlay",[1]=text})
+end
+
+function pt(x, y, id)
+    SendPacketRaw(false,{
+        type = 3,
+        int_data = id,
+        int_x = x,
+        int_y = y,
+        pos_x = x*32,
+        pos_y = y*32
+    })
+end
+
+function hitTile(x,y)
+    pt(x,y,18)
+end
+
+function below(x,y)
+    local b = GetTile(x,y+1)
+    return b and b.fg == platformId
+end
+
+function plant()
+    for _,t in pairs(GetTiles()) do
+        if not isRunning then return end
+        if t.fg == 0 and below(t.x,t.y) then
+            pt(t.x,t.y,plantId)
+            Sleep(delayPlant)
+        end
+    end
+end
+
+function CountUnreadyTree()
+    local c=0
+    for _,t in pairs(GetTiles()) do
+        if t.fg==seedId and not t.readyharvest then
+            c=c+1
+        end
+    end
+    return c
+end
+
+function Uws()
+    if CountUnreadyTree() >= countTree then
+        SendPacket(2,"action|dialog_return\ndialog_name|world_spray\n")
+    end
+end
+
+function spray()
+    for _,t in pairs(GetTiles()) do
+        if not isRunning then return end
+        if t.fg==seedId and not t.readyharvest then
+            pt(t.x,t.y,1778)
+            Sleep(delayHarvest)
+        end
+    end
+end
+
+function harvest()
+    for _,t in pairs(GetTiles()) do
+        if not isRunning then return end
+        if t.fg==seedId and t.readyharvest then
+            hitTile(t.x,t.y)
+            Sleep(delayHarvest)
+        end
+    end
+end
+
+function startPtht()
+    if isRunning then return end
+    isRunning = true
+    done = 0
+
+    for i=1,countPtht do
+        if not isRunning then break end
+
+        if mode=="pt" or mode=="ptht" then plant() end
+        if not isRunning then break end
+
+        if mode=="ptht" and sprayMode=="uws" then Uws() end
+        if mode=="ptht" and sprayMode=="dgs" then spray() end
+        if not isRunning then break end
+
+        if mode=="ht" or mode=="ptht" then harvest() end
+
+        done = done + 1
+        Sleep(2000)
+    end
+
+    isRunning=false
+end
+
+-- ===============================
+-- IMGUI MENU
+-- ===============================
+
+AddHook("OnDraw","PTHT_MENU",function()
+
+    if ImGui.Begin("PTHT Automation") then
+
+        ImGui.Text("=== CONFIG ===")
+
+        local c1,v1 = ImGui.InputText("Mode", mode, 10)
+        if c1 then mode=v1 end
+
+        local c2,v2 = ImGui.InputText("Spray Mode", sprayMode, 10)
+        if c2 then sprayMode=v2 end
+
+        local c3,v3 = ImGui.InputInt("Plant ID", plantId)
+        if c3 then plantId=v3 end
+
+        local c4,v4 = ImGui.InputInt("Seed ID", seedId)
+        if c4 then seedId=v4 end
+
+        local c5,v5 = ImGui.InputInt("Platform ID", platformId)
+        if c5 then platformId=v5 end
+
+        local c6,v6 = ImGui.SliderInt("Delay Plant", delayPlant,10,500)
+        if c6 then delayPlant=v6 end
+
+        local c7,v7 = ImGui.SliderInt("Delay Harvest", delayHarvest,10,500)
+        if c7 then delayHarvest=v7 end
+
+        local c8,v8 = ImGui.InputInt("Mag X", magx)
+        if c8 then magx=v8 end
+
+        local c9,v9 = ImGui.InputInt("Mag Y", magy)
+        if c9 then magy=v9 end
+
+        local c10,v10 = ImGui.InputInt("Min Tree UWS", countTree)
+        if c10 then countTree=v10 end
+
+        local c11,v11 = ImGui.InputInt("Loop Count", countPtht)
+        if c11 then countPtht=v11 end
+
+        ImGui.Separator()
+
+        if not isRunning then
+            if ImGui.Button("START") then
+                runThread(startPtht)
+            end
+        else
+            if ImGui.Button("STOP") then
+                isRunning=false
+            end
+        end
+
+        ImGui.SameLine()
+        if ImGui.Button("Save") then saveToFile() end
+
+        ImGui.SameLine()
+        if ImGui.Button("Load") then loadFromFile() end
+
+        ImGui.Separator()
+        ImGui.Text("Progress: "..done.." / "..countPtht)
+
+        ImGui.End()
+    end
+end)
