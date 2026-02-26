@@ -115,7 +115,6 @@ AddHook("OnVariant", "GrowIDCapture", function(var)
 end)
 
 function triggerGrowID()
-    SendPacket(2, "action|refresh_item_data\n")
     SendPacket(2, "action|enter_game\n")
 end
 
