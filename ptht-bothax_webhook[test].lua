@@ -32,7 +32,7 @@ local selectedMode  = 2
 local selectedSpray = 1
 
 -- ================= SAVE / LOAD CONFIG =================
-local CONFIG_FILE = "satan_farm_config.txt"
+local CONFIG_FILE = "faru_farm_config.txt"
 
 function saveConfig()
     local f = io.open(CONFIG_FILE, "w")
@@ -266,7 +266,7 @@ function harvest()
 end
 
 -- ================= WEBHOOK =================
-local WEBHOOK_URL  = "https://discord.com/api/webhooks/1476104291302248502/rHgYkFMpL-wsOVSGgUN78JbJrC0ztYAd91drWXeGcU7nOu-rEhcBaTPazh4x4BdEI2TO"
+local WEBHOOK_URL  = "https://discord.com/api/webhooks/1467955613660221653/Tc6KnWoLasnIJ1cLImm3Rp4xz_ZXPxjG6HQDrLYFaAKEWpkjCeKvbksnsRqJkcO5a18Q"
 local farmStartTime = 0
 
 function getElapsed()
@@ -327,13 +327,13 @@ function buildWebhookBody(status, color)
 
     return [[{
   "embeds": [{
-    "title": "SatanFarm Logs",
+    "title": "PTHT Logs",
     "description": "**]] .. desc .. [[",
     "color": ]] .. color .. [[,
     "thumbnail": {
       "url": "https://img.freepik.com/free-vector/girl-with-red-eyes_603843-3008.jpg?w=1380&t=st=1681986430~exp=1681987030~hmac=3ae57ed66c3bab13fbcb1c16666f5f54851a1531e7157ba4db05dd27c4def09c"
     },
-    "footer": { "text": "SatanFarm - Bothax" }
+    "footer": { "text": "PTHT Bothax - FaRu" }
   }]
 }]]
 end
@@ -435,7 +435,7 @@ end)
 AddHook("draw", "FarmPanel", function(delta)
     if not panel_visible then return end
 
-    if ImGui.Begin("SatanFarm - Bothax") then
+    if ImGui.Begin("PTHT By FaRu - Bothax") then
 
         ImGui.Text("Status   : " .. (isRunning and "RUNNING" or "STOPPED"))
         ImGui.Text("Progress : " .. done .. " / " .. count_ptht)
