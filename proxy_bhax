@@ -1,0 +1,314 @@
+-- ================= LOG STORAGE =================
+logs = {}
+spinLogs = {}
+chatLogs = {}
+
+-- ================= REME/QEME STATE =================
+remeMode = false
+qemeMode = false
+
+function getTime()
+	return os.date("%H:%M:%S")
+end
+function getWorldName()
+	local world = GetWorld()
+	if world and world.name then
+		return world.name
+	end
+	return "UNKNOWN"
+end
+function addLog(text)
+	local time = getTime()
+	local world = getWorldName()
+	local final = "`7["..time.."] `9("..world..") "..text
+	table.insert(logs, 1, final)
+	if #logs > 15 then
+		table.remove(logs)
+	end
+end
+function addSpinLog(text)
+	local time = getTime()
+	local world = getWorldName()
+	local final = "`7["..time.."] `9("..world..") "..text
+	table.insert(spinLogs, 1, final)
+	if #spinLogs > 15 then
+		table.remove(spinLogs)
+	end
+end
+function addChatLog(name, msg)
+	local time = getTime()
+	local world = getWorldName()
+	local final = "`7["..time.."] `9("..world..") `w"..name.."`7: `f"..msg
+	table.insert(chatLogs, 1, final)
+	if #chatLogs > 30 then
+		table.remove(chatLogs)
+	end
+end
+
+-- ================= DROP FUNCTION =================
+function drop_bgl(amount)
+	SendPacket(2, [[action|dialog_return
+dialog_name|drop_item
+itemID|7188|
+count|]] .. amount .. [[
+]])
+	addLog("`w"..GetLocal().name.." `cDropped `9"..amount.." BGL")
+end
+function drop_dl(amount)
+	SendPacket(2, [[action|dialog_return
+dialog_name|drop_item
+itemID|1796|
+count|]] .. amount .. [[
+]])
+	addLog("`w"..GetLocal().name.." `cDropped `9"..amount.." DL")
+end
+
+-- ================= TALK BUBBLE =================
+function talkBubble(text)
+	local localPlayer = GetLocal()
+	if not localPlayer then return end
+	SendVariantList({
+		[0] = "OnTalkBubble",
+		[1] = localPlayer.netid,
+		[2] = text
+	})
+end
+
+-- ================= UI LOG =================
+function showLogs()
+	local dialog = [[
+set_border_color|255,215,0,255
+set_bg_color|0,0,0,200
+add_label_with_icon|big|`9Logs Activity|left|6016|
+add_spacer|small|
+]]
+	if #logs == 0 then
+		dialog = dialog .. "add_smalltext|`7No logs yet|\n"
+	else
+		for i, v in ipairs(logs) do
+			dialog = dialog .. "add_smalltext|"..v.."|\n"
+		end
+	end
+	dialog = dialog .. [[
+add_spacer|small|
+add_button|close|Close|
+]]
+	SendVariantList({
+		[0] = "OnDialogRequest",
+		[1] = dialog
+	})
+end
+
+-- ================= UI SPIN LOGS =================
+function showSpinLogs()
+	local dialog = [[
+set_border_color|0,200,255,255
+set_bg_color|0,0,0,200
+add_label_with_icon|big|`bSpin Wheel Logs|left|2398|
+add_spacer|small|
+]]
+	if #spinLogs == 0 then
+		dialog = dialog .. "add_smalltext|`7No spin logs yet|\n"
+	else
+		for i, v in ipairs(spinLogs) do
+			dialog = dialog .. "add_smalltext|"..v.."|\n"
+		end
+	end
+	dialog = dialog .. [[
+add_spacer|small|
+add_button|close|Close|
+]]
+	SendVariantList({
+		[0] = "OnDialogRequest",
+		[1] = dialog
+	})
+end
+
+-- ================= UI CHAT LOGS =================
+function showChatLogs()
+	local dialog = [[
+set_border_color|100,255,100,255
+set_bg_color|0,0,0,200
+add_label_with_icon|big|`2Chat Logs|left|242|
+add_spacer|small|
+]]
+	if #chatLogs == 0 then
+		dialog = dialog .. "add_smalltext|`7No chat logs yet|\n"
+	else
+		for i, v in ipairs(chatLogs) do
+			dialog = dialog .. "add_smalltext|"..v.."|\n"
+		end
+	end
+	dialog = dialog .. [[
+add_spacer|small|
+add_button|close|Close|
+]]
+	SendVariantList({
+		[0] = "OnDialogRequest",
+		[1] = dialog
+	})
+end
+
+-- ================= REME/QEME CALCULATE =================
+function calcReme(num)
+	local n = tonumber(num)
+	local d1 = math.floor(n / 10)
+	local d2 = n % 10
+	local reme = d1 + d2
+	if reme > 10 then
+		reme = reme % 10
+	elseif reme == 10 then
+		reme = 0
+	end
+	return reme
+end
+
+function calcQeme(num)
+	local n = tonumber(num)
+	local d1 = math.floor(n / 10)
+	local d2 = n % 10
+	local qeme = d2
+	if d1 + d2 == 0 then
+		qeme = 1
+	end
+	return qeme
+end
+
+-- ================= COMMAND =================
+AddHook("OnSendPacket", "cmd", function(type, packet)
+	if type == 2 then
+		-- /bgl
+		local bgl = packet:match("/bgl%s+(%d+)")
+		if bgl then
+			drop_bgl(bgl)
+			talkBubble("`cDropped `9"..bgl.." BGL")
+			return true
+		end
+		-- /dl
+		local dl = packet:match("/dl%s+(%d+)")
+		if dl then
+			drop_dl(dl)
+			talkBubble("`cDropped `9"..dl.." DL")
+			return true
+		end
+		-- /logs
+		if packet:find("/logs") then
+			showLogs()
+			return true
+		end
+		-- /spinlogs
+		if packet:find("/spinlogs") then
+			showSpinLogs()
+			return true
+		end
+		-- /chatlogs
+		if packet:find("/chatlogs") then
+			showChatLogs()
+			return true
+		end
+		-- /reme
+		if packet:find("/reme") then
+			remeMode = not remeMode
+			if remeMode then
+				qemeMode = false
+				talkBubble("`4REME Mode `2ON")
+			else
+				talkBubble("`4REME Mode `8OFF")
+			end
+			return true
+		end
+		-- /qeme
+		if packet:find("/qeme") then
+			qemeMode = not qemeMode
+			if qemeMode then
+				remeMode = false
+				talkBubble("`bQEME Mode `2ON")
+			else
+				talkBubble("`bQEME Mode `8OFF")
+			end
+			return true
+		end
+	end
+end)
+
+-- ================= COLLECT DETECT =================
+AddHook("OnVariant", "collect", function(var)
+	if var[0] == "OnConsoleMessage" then
+		local text = var[1]
+
+		-- Collect BGL detect
+		if text and text:lower():find("blue gem lock") then
+			local count = text:match("(%d+)")
+			if count then
+				addLog("`1"..GetLocal().name.." Collected `9"..count.." BGL")
+				talkBubble("`bCollected `w"..count.."`cBGL")
+			end
+		end
+	end
+
+	-- ================= SPIN + REME/QEME DETECT =================
+	if var[0] == "OnTalkBubble" then
+		local netid = var[1]
+		local raw   = var[2]
+		if not raw or raw == "" then return end
+
+		-- Detect spin wheel message
+		if raw:find("spun the wheel and got") then
+			-- Ambil angka spin dari warna `4, `b, atau `2
+			local spinNum = raw:match("`4(%d+)`!") 
+				or raw:match("`b(%d+)`!") 
+				or raw:match("`2(%d+)`!")
+
+			if spinNum then
+				local spinMsg = raw
+
+				-- REME MODE
+				if remeMode then
+					local reme = calcReme(spinNum)
+					spinMsg = spinMsg .. " `4[ Reme : `w" .. reme .. " `4]"
+					talkBubble(raw .. " `4[ Reme : `w" .. reme .. " `4]")
+					addSpinLog("`w"..spinMsg)
+					return true
+				end
+
+				-- QEME MODE
+				if qemeMode then
+					local qeme = calcQeme(spinNum)
+					spinMsg = spinMsg .. " `b[ Qeme : `w" .. qeme .. " `b]"
+					talkBubble(raw .. " `b[ Qeme : `w" .. qeme .. " `b]")
+					addSpinLog("`w"..spinMsg)
+					return true
+				end
+
+				-- No mode, just log
+				addSpinLog("`w"..raw)
+			end
+		end
+
+		-- ================= CHAT DETECT =================
+		-- Parse pesan bersih
+		local msg = raw:match("player_chat=(.+)$")
+		if not msg then
+			msg = raw
+		end
+		msg = msg:gsub("^%s+", ""):gsub("%s+$", "")
+
+		-- Cari nama player
+		local name = "Unknown"
+		local local_ = GetLocal()
+
+		if local_ and local_.netid == netid then
+			name = local_.name
+		else
+			local p = GetPlayer(netid)
+			if p and p.name then
+				name = p.name
+			end
+		end
+
+		-- Jangan log jika itu pesan spin
+		if not raw:find("spun the wheel and got") then
+			addChatLog(name, msg)
+		end
+	end
+end)
