@@ -1,0 +1,73 @@
+AddHook("OnVariant", "asu", function(var)
+	if var[0] == "OnStoreRequest" then
+		return true
+	end
+end)
+
+TRASH_ITEMS = {}
+DROP_ITEMS = {4296, 1258, 1260, 1262, 1264, 1266, 1268, 1270, 1296, 4308, 4310, 4312, 4314, 4316, 4318}
+STEP_LIMIT = 25
+
+local dropCount = 0
+
+function getAmount(id)
+	return GetItemCount(id) or 0
+end
+
+function trashItem(id)
+	SendPacket(2, string.format([[action|dialog_return
+dialog_name|trash_item
+itemID|%d|
+count|180
+]], id))
+end
+
+function dropItem(id)
+	SendPacket(2, string.format([[action|dialog_return
+dialog_name|drop_item
+itemID|%d|
+count|180
+]], id))
+end
+
+function stepBack()
+	local x = math.floor(GetLocal().pos.x / 32)
+	local y = math.floor(GetLocal().pos.y / 32)
+	FindPath(x - 1, y)
+	Sleep(250)
+end
+
+RunThread(function()
+	while true do
+		-- Trash items jika >= 180
+		for _, id in ipairs(TRASH_ITEMS) do
+			if getAmount(id) >= 180 then
+				trashItem(id)
+				Sleep(250)
+			end
+		end
+
+		-- Drop items jika == 200, dengan auto step-back
+		for _, id in ipairs(DROP_ITEMS) do
+			if getAmount(id) >= 180 then
+				dropItem(id)
+				Sleep(200)
+				dropCount = dropCount + 1
+				if dropCount >= STEP_LIMIT then
+					stepBack()
+					dropCount = 0
+				end
+			end
+		end
+
+		Sleep(200)
+	end
+end)
+
+-- Main loop beli farm_pack
+while true do
+	SendPacket(2, [[action|buy
+item|surg_value_pack
+]])
+	Sleep(100)
+end
