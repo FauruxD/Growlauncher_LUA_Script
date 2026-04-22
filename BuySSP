@@ -67,7 +67,7 @@ end)
 -- Main loop beli farm_pack
 while true do
 	SendPacket(2, [[action|buy
-item|5seed
+item|ssp_10_pack
 ]])
 	Sleep(100)
 end
