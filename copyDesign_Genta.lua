@@ -663,7 +663,7 @@ function help()
         {"/resume", "Resumes a paused build."},
         {"/delete <world>", "Opens dialog to delete items from file."},
         {"/deletedesign <world>", "Deletes a design file."},
-        {"/help", "Shows this help dialog."},
+        {"/dehelp", "Shows this help dialog."},
         {"/delayput <ms>", "Sets placement delay."},
         {"/delaytp <ms>", "Sets post-action delay."}
     }
@@ -810,7 +810,7 @@ local function commandHook(type, pkt)
             end
             deleteDesign(worldName)
             return true
-        elseif command == "/help" then
+        elseif command == "/dehelp" then
             help()
             return true
         elseif command == "/delayput" then
