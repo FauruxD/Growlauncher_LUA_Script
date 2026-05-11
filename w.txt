@@ -1,0 +1,126 @@
+Berikut adalah perintah SQL berdasarkan struktur database `ecommerce_db` yang Anda berikan:
+
+## Sesi 1
+
+**1. Daftar produk Elektronik dengan stok > 20 (Subquery)**
+
+```sql
+SELECT * FROM (
+    SELECT nama_produk, kategori, harga, stok 
+    FROM produk 
+    WHERE kategori = 'Elektronik' AND stok > 20
+) AS produk_elektronik
+ORDER BY stok DESC;
+
+```
+
+**2. Pelanggan yang membeli "Printer Epson" (Subquery)**
+*Catatan: Di dalam database Anda tertulis "Printer Epson", bukan "Epron".*
+
+```sql
+SELECT p.nama, pr.nama_produk, pr.kategori, dp.jumlah, dp.total_harga
+FROM pelanggan p
+JOIN pesanan ps ON p.id_pelanggan = ps.id_pelanggan
+JOIN detail_pesanan dp ON ps.id_pesanan = dp.id_pesanan
+JOIN produk pr ON dp.id_produk = pr.id_produk
+WHERE pr.id_produk IN (
+    SELECT id_produk 
+    FROM produk 
+    WHERE nama_produk = 'Printer Epson'
+);
+
+```
+
+**3. View jumlah transaksi per pelanggan di masing-masing kota**
+
+```sql
+CREATE VIEW v_transaksi_per_kota AS
+SELECT kota, nama, COUNT(id_pesanan) AS jumlah_transaksi
+FROM pelanggan
+LEFT JOIN pesanan ON pelanggan.id_pelanggan = pesanan.id_pelanggan
+GROUP BY kota, nama;
+
+```
+
+---
+
+## Sesi 2
+
+**1. Transaksi antara 17/02/2024 sampai 20/02/2024 (Subquery)**
+
+```sql
+SELECT 
+    (SELECT nama FROM pelanggan WHERE id_pelanggan = ps.id_pelanggan) AS nama_pelanggan,
+    (SELECT nama_produk FROM produk WHERE id_produk = dp.id_produk) AS nama_produk
+FROM pesanan ps
+JOIN detail_pesanan dp ON ps.id_pesanan = dp.id_pesanan
+WHERE ps.tgl_pesanan BETWEEN '2024-02-17' AND '2024-02-20';
+
+```
+
+**2. Pelanggan yang memesan kategori Aksesoris (Subquery)**
+
+```sql
+SELECT nama, kota
+FROM pelanggan
+WHERE id_pelanggan IN (
+    SELECT ps.id_pelanggan
+    FROM pesanan ps
+    JOIN detail_pesanan dp ON ps.id_pesanan = dp.id_pesanan
+    WHERE dp.id_produk IN (
+        SELECT id_produk FROM produk WHERE kategori = 'Aksesoris'
+    )
+)
+ORDER BY nama ASC;
+
+```
+
+**3. View v_transaksi_pelanggan**
+
+```sql
+CREATE VIEW v_transaksi_pelanggan AS
+SELECT p.nama, ps.tgl_pesanan, dp.total_harga
+FROM pelanggan p
+JOIN pesanan ps ON p.id_pelanggan = ps.id_pelanggan
+JOIN detail_pesanan dp ON ps.id_pesanan = dp.id_pesanan;
+
+```
+
+---
+
+## Sesi 3
+
+**1. Produk Elektronik dengan stok > 30**
+
+```sql
+SELECT nama_produk 
+FROM produk 
+WHERE kategori = 'Elektronik' AND stok > 30;
+
+```
+
+**2. Detail pesanan kategori "Furniture" (Subquery)**
+
+```sql
+SELECT p.id_pelanggan, p.nama, pr.nama_produk, pr.kategori, ps.tgl_pesanan
+FROM pelanggan p
+JOIN pesanan ps ON p.id_pelanggan = ps.id_pelanggan
+JOIN detail_pesanan dp ON ps.id_pesanan = dp.id_pesanan
+JOIN produk pr ON dp.id_produk = pr.id_produk
+WHERE pr.id_produk IN (
+    SELECT id_produk FROM produk WHERE kategori = 'Furniture'
+)
+ORDER BY p.nama ASC;
+
+```
+
+**3. View v_produk_terjual**
+
+```sql
+CREATE VIEW v_produk_terjual AS
+SELECT pr.nama_produk, SUM(dp.jumlah) AS total_terpesan
+FROM produk pr
+LEFT JOIN detail_pesanan dp ON pr.id_produk = dp.id_produk
+GROUP BY pr.nama_produk;
+
+```
